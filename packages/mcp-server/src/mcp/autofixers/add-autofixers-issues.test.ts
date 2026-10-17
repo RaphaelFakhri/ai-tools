@@ -499,6 +499,21 @@ describe('add_autofixers_issues', () => {
 			);
 		});
 
+		it(`should add suggestions when using a function as the first argument to $derived inside another function call`, () => {
+			const content = run_autofixers_on_code(`
+			<script>
+				let count = $state(0);
+				$effect.root(() => {
+					const double = $derived(() => count * 2);
+				});
+			</script>`);
+
+			expect(content.suggestions.length).toBeGreaterThanOrEqual(1);
+			expect(content.suggestions).toContain(
+				'You are passing a function to $derived when declaring "double" but $derived expects an expression. You can use $derived.by instead.',
+			);
+		});
+
 		it(`should add suggestions when using a function as the first argument to $derived without the declaring part if it's not an identifier`, () => {
 			const content = run_autofixers_on_code(`
 			<script>
